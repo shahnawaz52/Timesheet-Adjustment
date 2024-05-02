@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+
+    <t t-name="flyt_timesheet_grid.GroupedGridBody" t-inherit="web_grid.GroupedGridBody" t-inherit-mode="extension" owl="1">
+        <xpath expr="//th" position="replace">
+            <th>
+                <t t-if="grid.__label">
+                    <t t-if="showEmployeeAvatar">
+                        <TimesheetM2OAvatarEmployeeAdapter Component="widgetComponents.FlytTimesheetM2OAvatarEmployee" value="grid.__label" workingHoursData="props.workingHoursData[grid.__label[0]]" timeBoundariesContext="props.timeBoundariesContext" rowIndex="grid_index" rangeContext="props.range" />
+                    </t>
+                    <t t-else="" t-esc="grid.__label[1]"/>
+                </t>
+                <t t-else="">Undefined</t>
+            </th>
+        </xpath>
+    </t>
+
+    <t t-name="flyt_timesheet_grid.GridRows" t-inherit="web_grid.GridRows" t-inherit-mode="extension" owl="1">
+        <xpath expr="//div[@t-att-title='label']/t[@t-if='label']" position="replace">
+            <t t-if="label">
+                <t t-if="showEmployeeAvatar">
+                    <t t-set="employee" t-value="grid.rows[rowlabel_index].values.employee_id" />
+                    <TimesheetM2OAvatarEmployeeAdapter Component="widgetComponents.FlytTimesheetM2OAvatarEmployee" value="employee" workingHoursData="props.workingHoursData[employee[0]]" timeBoundariesContext="props.timeBoundariesContext" rowIndex="rowlabel_index" rangeContext="props.range"/>
+                </t>
+                <t t-else="" t-esc="label"/>
+            </t>
+        </xpath>
+    </t>
+
+    <t t-name="flyt_timesheet_grid.Table" t-inherit="web_grid.Table" t-inherit-mode="extension" owl="1">
+        
+        <xpath expr="//tfoot/tr" position="after">
+            <t t-if="props.is_mytimesheets">
+            <tr class="border">
+                <td/>
+                <th><div class="ml-3 float-left">Expected Hours</div></th>
+                <t t-foreach="columns" t-as="column" t-key="column_index">
+                    <t t-set="planned_hours" t-value="_getWorkhours(column_index)"/>
+                    <td>
+                        <t t-if="!column.is_unavailable">
+                            <span style="text-align: center;position:absolute;top:auto;right:1px;bottom:0px;left:0px;">
+                                <t t-esc="_format(planned_hours.value)"/>
+                            </span>
+                        </t>
+                        <t t-else="">
+                            <span style="text-align: center;position:absolute;top:auto;right:1px;bottom:0px;left:0px;">
+                                <t t-esc="_format(0)"/>
+                            </span>
+                        </t>
+                    </td>
+                </t>
+                <t t-if="props.range !== 'day' and !props.hideLineTotal">
+                    <td>
+                        <span style="position:absolute;top:auto;right:1px;bottom:0px;">
+                            <t t-esc="_format(gridTotalHours)"/>
+                        </span>
+                    </td>
+                </t>
+            </tr>
+            <tr class="border">
+                <td/>
+                <th><div class="ml-3 float-left">Delta Hours</div></th>
+                    <t t-foreach="columns" t-as="column" t-key="column_index">
+                        <t t-set="total_cells" t-value="_formatCellContentTotals(column_index)"/>
+                        <t t-set="planned_hours" t-value="_getWorkhours(column_index)"/>
+                        <t t-set="deltaHours" t-value="total_cells.new_value - planned_hours.value"/>
+                        <t t-if="gridTotal.value === 0" t-set="deltaHours" t-value="0 - planned_hours.value"/>
+                        <td t-att-class="{
+                            'o_grid_section_subtext_overtime': deltaHours &gt; 0,
+                            'text-danger': deltaHours &lt; 0,
+                            }">
+                            <t t-if="(!column.is_unavailable) or (column.is_unavailable and total_cells.value)">
+                                <span style="text-align: center;position:absolute;top:auto;right:1px;bottom:0px;left:0px;">
+                                    <t t-esc="_format(deltaHours)"/>
+                                </span>
+                            </t>
+                            <t t-else="">
+                                <span style="text-align: center;position:absolute;top:auto;right:1px;bottom:0px;left:0px;">
+                                    <t t-esc="_format(0)"/>
+                                </span>
+                            </t>
+                        </td>
+                    </t>
+                    <t t-if="props.range !== 'day' and !props.hideLineTotal">
+                        <t t-set="deltaTotal" t-value="gridTotal.value - gridTotalHours - gridDeltaTotalHours"/>
+                        <td t-att-class="{
+                            'o_grid_section_subtext_overtime': deltaTotal &gt; 0,
+                            'text-danger': deltaTotal &lt; 0,
+                            }">
+                            <span style="position:absolute;top:auto;right:1px;bottom:0px;">
+                                <t t-esc="_format(deltaTotal)"/>
+                            </span>
+                        </td>
+                    </t>
+                </tr>
+            </t>
+        </xpath>
+        <xpath expr="//tfoot/t/tr/td" position="replace">
+            <td t-if="!showTimerButton" style="display:none;"/>
+        </xpath>
+        <xpath expr="//tfoot/t/tr/th" position="before">
+            <td t-if="showTimerButton"/>
+        </xpath>
+        <xpath expr="//tfoot//tr[2]/td" position="replace">
+            <td t-if="!showTimerButton" style="display:none;"/>
+        </xpath>
+        <xpath expr="//tfoot//tr[2]/th" position="before">
+            <td t-if="showTimerButton"/>
+        </xpath>
+    </t>
+
+</templates>
