@@ -28,7 +28,7 @@ To install this enhanced Timesheet and Gantt View module, follow these steps:
 1. Ensure you have a working installation of Odoo.
 2. Clone the repository to your server:
 git clone https://github.com/yourusername/enhanced-timesheet-gantt.git
-3. 3. Add the module to your Odoo addons path:
+3. Add the module to your Odoo addons path:
 --addons-path=/path/to/your/addons,/path/to/enhanced-timesheet-gantt
 4. Update your Odoo module list and install the module from the Odoo backend interface.
 
